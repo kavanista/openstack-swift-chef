@@ -1,0 +1,24 @@
+uid = <%= node[:openstack_swift][:user] %>
+gid = <%= node[:openstack_swift][:group] %>
+log file = /var/log/rsyncd.log
+pid file = /var/run/rsyncd.pid
+address = <%= node[:ipaddress] %>
+
+[account]
+max connections = 2
+path = /srv/node/
+read only = false
+lock file = /var/lock/account.lock
+
+[container]
+max connections = 2
+path = /srv/node/
+read only = false
+lock file = /var/lock/container.lock
+
+[object]
+max connections = 2
+path = /srv/node/
+read only = false
+lock file = /var/lock/object.lock
+

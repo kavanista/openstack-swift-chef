@@ -1,0 +1,29 @@
+{
+  "conflicting": {
+  },
+  "platforms": {
+  },
+  "description": "Installs/Configures openstack_swift",
+  "long_description": "= DESCRIPTION:\n\n= REQUIREMENTS:\n\n= ATTRIBUTES: \n\n= USAGE:\n\n",
+  "providing": {
+  },
+  "recipes": {
+  },
+  "maintainer": "New Goliath, Inc.",
+  "replacing": {
+  },
+  "maintainer_email": "judd@newgoliath.com",
+  "version": "0.1.0",
+  "groupings": {
+  },
+  "attributes": {
+  },
+  "recommendations": {
+  },
+  "license": "Apache 2.0",
+  "name": "swift",
+  "suggestions": {
+  },
+  "dependencies": {
+  }
+}
