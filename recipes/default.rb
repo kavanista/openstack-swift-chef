@@ -42,6 +42,10 @@ end
   package pkg_name
 end
 
+directory "/etc/swift" do
+	action :create
+end
+
 # setup the swift configuration files
 cookbook_file "/etc/swift/swift.conf" do
   source "swift.conf"
