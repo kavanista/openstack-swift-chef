@@ -19,7 +19,18 @@
 
 include_recipe 'apt'
 
-package "python-software-properties"
+package "python-software-properties" do
+	action :install
+end
+
+apt_repository "swift-core-ppa" do
+	uri "http://ppa.launchpad.net/swift-core/ppa/ubuntu"
+	keyserver "keyserver.ubuntu.com"
+	key "3FD32ED0E38B0CFA59495557C842BD46562598B4"
+  distribution node[:lsb][:codename]
+  components ["main"]
+  action :add
+end
 
 execute "add openstack repo" do
 	command "add-apt-repository ppa:swift-core/ppa"
