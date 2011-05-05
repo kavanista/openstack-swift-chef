@@ -24,7 +24,7 @@ include_recipe 'apt'
 end
 
 execute "partition disk" do
-	command "echo -e \",,L\n;\n;\n;\" | sfdisk /dev/#{node[:openstack_swift][:device_name]}"
+	command "echo -e \",,L\\n;\\n;\\n;\" | sfdisk /dev/#{node[:openstack_swift][:device_name]}"
 	not_if "xfs_admin -u /dev/#{node[:openstack_swift][:device_name]}1"
 end
 
