@@ -23,10 +23,14 @@ include_recipe 'apt'
   package pkg_name
 end
 
+execute "partition disk" do
+	command "echo -e \",,L\n;\n;\n;\" | sfdisk /dev/#{node[:openstack_swift][:device_name]}"
+	not_if "xfs_admin -u /dev/#{node[:openstack_swift][:device_name]}1"
+end
+
 execute "build filesystem" do
-	#fdisk /dev/sdb  (set up a single partition)
-	command "mkfs.xfs -i size=1024 /dev/#{node[:openstack_swift][:device_name]} "
-	not_if "xfs_admin -u /dev/#{node[:openstack_swift][:device_name]} "
+	command "mkfs.xfs -i size=1024 /dev/#{node[:openstack_swift][:device_name]}1"
+	not_if "xfs_admin -u /dev/#{node[:openstack_swift][:device_name]}1"
 end
 
 # where the device will be mounted
@@ -38,17 +42,13 @@ directory "/srv/node/#{node[:openstack_swift][:device_name]}" do
   group "#{node[:openstack_swift][:group]}"
 end
 
-execute "update fstab" do
-  command "echo '/dev/#{node[:openstack_swift][:device_name]}  /srv/node/#{node[:openstack_swift][:device_name]} xfs noauto,noatime,nodiratime,nobarrier,logbufs=8 0 0' >> /etc/fstab"
-  not_if "grep '/dev/#{node[:openstack_swift][:device_name]}' /etc/fstab "
+mount "/srv/node/#{node[:openstack_swift][:device_name]}" do
+	device "#{node[:openstack_swift][:device_name]}1"
+	fstype "xfs"
+	options "noauto,noatime,nodiratime,nobarrier,logbufs=8"
+	action [ :enable, :mount ]
 end
-
-#mount /srv/node/sdb1
-execute "mount /srv/node/#{node[:openstack_swift][:device_name]}" do
-  not_if "df | grep /dev/#{node[:openstack_swift][:device_name]}"
-end
-
-#chown -R swift:swift /srv/node
+	
 directory "/srv/node/#{node[:openstack_swift][:device_name]}" do
   recursive true
   mode "0755"
@@ -56,7 +56,6 @@ directory "/srv/node/#{node[:openstack_swift][:device_name]}" do
   group "#{node[:openstack_swift][:group]}"
 end
 
-# setup RSYNC
 template "/etc/rsyncd.conf" do
   source "rsyncd.conf.erb"
 end
@@ -69,8 +68,6 @@ service "rsync" do
   supports :status => true, :restart => true, :reload => true
   action [ :enable, :start ]
 end
-
-
 
 
 # setup the swift configuration files
