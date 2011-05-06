@@ -67,6 +67,7 @@ end
       common_conf[ ringtype+'_replicas'].to_s + " " +
       common_conf[ ringtype+'_min_part_hours'].to_s 
     #command "swift-ring-builder /etc/swift/#{ringtype}.builder create #{common_conf[ #{ringtype}_part_power] } " 
+    
     not_if "test -f /etc/swift/#{ringtype}.builder"
   end
 end
@@ -102,13 +103,23 @@ cluster_conf["rings"].each do |ring|
           ring['cluster'] + "_" +
           ring['meta'] + " " +
           ring['weight'].to_s + "; exit 0"
-        not_if "test -f /etc/swift/account.builder"
-      end   
+          notifies :run, "execute[rebalance the #{ringtype} ring]", :immediately
+      end
     end
   end
 end
 
+file "/etc/swift/test.txt" do
+  content nil
+  backup false
+  action :create
+  notifies :run, "execute[my test]", :immediately
+end
 
+execute "my test" do
+  command "touch /tmp/itran"
+  action :nothing
+end
 
 #TODO: find approprite exit values for this
 
