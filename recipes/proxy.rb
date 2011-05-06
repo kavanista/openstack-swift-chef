@@ -11,11 +11,21 @@ common_conf = cluster_conf["ring_common"]
   package pkg_name
 end
 
-# make ssl certs/keys
-execute "make ssl keys" do
-  command "cd /etc/swift; openssl req -new -x509 -nodes -out cert.crt -keyout cert.key"
-  not_if "file /etc/swift/cert.crt"
+cookbook_file "/etc/swift/cert.key" do
+  source "cert.key"
 end
+
+cookbook_file "/etc/swift/cert.crt" do
+  source "cert.crt"
+end
+
+
+# make ssl certs/keys
+#execute "make ssl keys" do
+#  command "cd /etc/swift; openssl req -new -x509 -nodes -out cert.crt -keyout cert.key"
+#  not_if "file /etc/swift/cert.crt"
+#  environment( { 'KEY_COUNTRY' => 'US', 'KEY_PROVINCE' => 'NY', 'KEY_CITY' => 'New York', 'KEY_ORG' => 'Voxel dot Net, Inc.', 'KEY_EMAIL' => 'support@voxel.net', 'KEY_CN' => 'swift.voxel.net' } )
+#end
 
 # how do I find the interface I want it to listen on?  Knowing the network, and doing the math.
 execute "fix up memcached.conf to list on proxy network interface" do
