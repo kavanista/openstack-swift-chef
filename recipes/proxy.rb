@@ -104,7 +104,7 @@ end
 # RIND_NODE_CONFIG
 # <ring> <zone> <storage node IP address>  <device name> <weight>
 
-#storage_nodes = search(:node, "role:storage")
+storage_nodes = search(:node, "role:swift-storage AND role:environment-#{node[:app_environment]}")
 #storage_nodes.each_with_index do |storage_node, zone|
   #execute "make #{storage_node[:ipaddress]}" do
     #cwd '/etc/swift/'
