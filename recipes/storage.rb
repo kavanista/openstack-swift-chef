@@ -47,6 +47,7 @@ mount "/srv/node/#{node[:openstack_swift][:device_name]}" do
   fstype "xfs"
   options "noauto,noatime,nodiratime,nobarrier,logbufs=8"
   action [ :enable, :mount ]
+  only_if "grep #{node[:openstack_swift][:device_name]}1 /proc/partitions"
 end
   
 directory "/srv/node/#{node[:openstack_swift][:device_name]}" do
