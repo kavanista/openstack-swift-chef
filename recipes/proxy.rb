@@ -13,10 +13,12 @@ end
 
 cookbook_file "/etc/swift/cert.key" do
   source "cert.key"
+  owner "swift"
 end
 
 cookbook_file "/etc/swift/cert.crt" do
   source "cert.crt"
+  owner "swift"
 end
 
 
