@@ -103,7 +103,7 @@ cluster_conf["rings"].each do |ring|
           ring['cluster'] + "_" +
           ring['meta'] + " " +
           ring['weight'].to_s + "; exit 0"
-          notifies :run, "execute[rebalance the #{ringtype} ring]", :immediately
+          #notifies :run, "execute[rebalance the #{ringtype} ring]", :immediately
       end
     end
   end
