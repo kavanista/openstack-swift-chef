@@ -24,13 +24,13 @@ include_recipe 'apt'
 end
 
 execute "partition disk" do
-	command "echo -e \",,L\\n;\\n;\\n;\" | sfdisk /dev/#{node[:openstack_swift][:device_name]} > /dev/null 2>&1"
-	not_if "xfs_admin -u /dev/#{node[:openstack_swift][:device_name]}1"
+  command "echo -e \',,L\\n;\\n;\\n;\' | sfdisk /dev/#{node[:openstack_swift][:device_name]} > /dev/null 2>&1"
+  not_if "xfs_admin -u /dev/#{node[:openstack_swift][:device_name]}1"
 end
 
 execute "build filesystem" do
-	command "mkfs.xfs -i size=1024 /dev/#{node[:openstack_swift][:device_name]}1"
-	not_if "xfs_admin -u /dev/#{node[:openstack_swift][:device_name]}1"
+  command "mkfs.xfs -i size=1024 /dev/#{node[:openstack_swift][:device_name]}1"
+  not_if "xfs_admin -u /dev/#{node[:openstack_swift][:device_name]}1"
 end
 
 # where the device will be mounted
@@ -43,12 +43,12 @@ directory "/srv/node/#{node[:openstack_swift][:device_name]}" do
 end
 
 mount "/srv/node/#{node[:openstack_swift][:device_name]}" do
-	device "#{node[:openstack_swift][:device_name]}1"
-	fstype "xfs"
-	options "noauto,noatime,nodiratime,nobarrier,logbufs=8"
-	action [ :enable, :mount ]
+  device "#{node[:openstack_swift][:device_name]}1"
+  fstype "xfs"
+  options "noauto,noatime,nodiratime,nobarrier,logbufs=8"
+  action [ :enable, :mount ]
 end
-	
+  
 directory "/srv/node/#{node[:openstack_swift][:device_name]}" do
   recursive true
   mode "0755"
