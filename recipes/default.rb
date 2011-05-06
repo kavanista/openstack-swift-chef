@@ -32,12 +32,6 @@ apt_repository "swift-core-ppa" do
   action :add
 end
 
-execute "add openstack repo" do
-	command "add-apt-repository ppa:swift-core/ppa"
-	command "apt-get update"
-	not_if "file /etc/apt/sources.list.d/swift-core-ppa-lucid.list"
-end
-
 %w{swift openssh-server}.each do |pkg_name|
   package pkg_name
 end
