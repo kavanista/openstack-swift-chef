@@ -89,7 +89,7 @@ cluster_conf["rings"].each do |ring|
           ring['device'] + "_" +
           ring['cluster'] + "_" +
           ring['meta'] + " " +
-          ring['weight'] + "; exit 0"
+          ring['weight'].to_s + "; exit 0"
         not_if "test -f /etc/swift/account.builder"
       end   
     end
