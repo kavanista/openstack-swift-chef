@@ -43,7 +43,7 @@ directory "/srv/node/#{node[:openstack_swift][:device_name]}" do
 end
 
 mount "/srv/node/#{node[:openstack_swift][:device_name]}" do
-  device "#{node[:openstack_swift][:device_name]}1"
+  device "/dev/#{node[:openstack_swift][:device_name]}1"
   fstype "xfs"
   options "noauto,noatime,nodiratime,nobarrier,logbufs=8"
   action [ :enable, :mount ]
