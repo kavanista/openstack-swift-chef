@@ -99,7 +99,8 @@ cluster_conf["rings"].each do |ring|
           notifies :run, "execute[rebalance the #{ring['ring_type']} ring]"
 
           not_if do
-            `echo blah > /tmp/blee && cd /etc/swift && swift-ring-builder #{ring['ring_type']}.builder search #{ring['hostname']}`
+            metaname = "z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['cluster'] + "_" + ring['meta']
+            `echo blah > /tmp/blee && cd /etc/swift && swift-ring-builder #{ring['ring_type']}.builder search #{metaname}`
             $? == 256   # Why is this 256?  It's what works, but I don't know why.
           end
         end
