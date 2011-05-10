@@ -11,6 +11,13 @@ common_conf = cluster_conf["ring_common"]
   package pkg_name
 end
 
+directory "/etc/swift" do
+  recursive true
+  owner node[:openstack_swift][:user]
+  group node[:openstack_swift][:group]
+  mode "0644"
+end
+
 cookbook_file "/etc/swift/cert.key" do
   source "cert.key"
   owner "swift"
@@ -72,53 +79,32 @@ end
   end
 end
 
-# update the ring config, if they differ from the databag.
+# Adds Nodes to Rings
+# For each ring, marked online, call ring builder for each node in the bag/ring
+# *NOTE* Only if the ring_type.builder file does not yet exist
 
-# update it from the data bag
-# search for all the rings that have servers that are:
-## have the storage role on the node
-## marked online in the databag
-
-cluster_conf["rings"].each do |ring|
+cluster_conf["rings"].keys.sort.each do |key|
   # search for the node with the matching hostname
   if ring['status'] == 'online'
-    search(:node, "hostname:" + ring['hostname'] ) do |storage_node|
-      log "found node matching " + ring['hostname']
-      log "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + 
-        ring['zone'] + '-' + 
-        storage_node[:ipaddress] + ":" +
-        ring['port'].to_s + "/" +
-        ring['device'] + "_" +
-        ring['cluster'] + "_" +
-        ring['meta'] + " " +
-        ring['weight'].to_s + "; exit 0"
-      execute "make #{storage_node[:ipaddress]}" do
-        cwd '/etc/swift/'
-        ##user "swift"
-        command "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + 
-          ring['zone'] + '-' + 
-          storage_node[:ipaddress] + ":" +
-          ring['port'].to_s + "/" +
-          ring['device'] + "_" +
-          ring['cluster'] + "_" +
-          ring['meta'] + " " +
-          ring['weight'].to_s + "; exit 0"
-          #notifies :run, "execute[rebalance the #{ringtype} ring]", :immediately
-      end
+    #unless File.exists?("/etc/swift/#{ring['ring_type']}.builder")
+      ## TODO This should check for each ring file vs just account
+      search(:node, "hostname:" + ring['hostname'] ) do |storage_node|
+        log "found node matching " + ring['hostname']
+        log "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['cluster'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
+
+        execute "make #{storage_node[:ipaddress]}" do
+          cwd '/etc/swift'
+          command "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['cluster'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
+          
+          notifies :run, "execute['rebalance the #{ring['ring_type']} ring']"
+
+          not_if do
+            `cd /etc/swift && swift-ring-builder #{ring['ring_type']}.builder search #{ring['hostname']}`
+          end
+        end
+      #end
     end
   end
-end
-
-file "/etc/swift/test.txt" do
-  content nil
-  backup false
-  action :create
-  notifies :run, "execute[my test]", :immediately
-end
-
-execute "my test" do
-  command "touch /tmp/itran"
-  action :nothing
 end
 
 #TODO: find approprite exit values for this
@@ -154,12 +140,13 @@ storage_nodes = search(:node, "role:swift-storage AND role:environment-#{node[:a
 
 %w{account object container}.each do |ringtype|
   execute "rebalance the #{ringtype} ring" do
+    log "Rebalancing #{ringtype}"
     cwd '/etc/swift/'
     command "swift-ring-builder /etc/swift/#{ringtype}.builder rebalance"
     not_if "test -f /etc/swift/#{ringtype}.builder"
+    action :nothing
   end
 end
-
 
 # send the rings to all the nodes, if things have changed
 storage_nodes.each_with_index do |storage_node, zone|
@@ -170,13 +157,5 @@ storage_nodes.each_with_index do |storage_node, zone|
     not_if "test -f /etc/swift/account.builder"
   end
 end
-
-directory "/etc/swift" do
-  recursive true
-  owner node[:openstack_swift][:user]
-  group node[:openstack_swift][:group]
-  mode "0644"
-end
-
 
 #log("data bagerry " + my_conf[ring_common] )
