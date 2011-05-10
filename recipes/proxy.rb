@@ -79,16 +79,6 @@ end
   end
 end
 
-%w{account object container}.each do |ringtype|
-  execute "rebalance the #{ringtype} ring" do
-    #log "Rebalancing #{ringtype}"
-    cwd '/etc/swift/'
-    command "swift-ring-builder /etc/swift/#{ringtype}.builder rebalance"
-    #not_if "test -f /etc/swift/#{ringtype}.builder"
-    action :nothing
-  end
-end
-
 # Adds Nodes to Rings
 # For each ring, marked online, call ring builder for each node in the bag/ring
 # *NOTE* Only if the ring_type.builder file does not yet exist
@@ -106,7 +96,7 @@ cluster_conf["rings"].each do |ring|
           cwd '/etc/swift'
           command "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['cluster'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
           
-          notifies :run, "execute['rebalance the #{ring['ring_type']} ring']"
+          notifies :run, "execute[rebalance the #{ring['ring_type']} ring]"
 
           not_if do
             `cd /etc/swift && swift-ring-builder #{ring['ring_type']}.builder search #{ring['hostname']}`
@@ -147,6 +137,16 @@ storage_nodes = search(:node, "role:swift-storage AND role:environment-#{node[:a
 #end
 
 # rebalance the rings, if things have changed
+%w{account object container}.each do |ringtype|
+  execute "rebalance the #{ringtype} ring" do
+    #log "Rebalancing #{ringtype}"
+    cwd '/etc/swift/'
+    command "swift-ring-builder /etc/swift/#{ringtype}.builder rebalance"
+    #not_if "test -f /etc/swift/#{ringtype}.builder"
+    action :nothing
+  end
+end
+
 
 # send the rings to all the nodes, if things have changed
 storage_nodes.each_with_index do |storage_node, zone|
