@@ -84,6 +84,7 @@ end
 # *NOTE* Only if the ring_type.builder file does not yet exist
 
 cluster_conf["rings"].each do |ring|
+  log "INSPECT: " + cluster_conf.inspect
   # search for the node with the matching hostname
   if ring['status'] == 'online'
     #unless File.exists?("/etc/swift/#{ring['ring_type']}.builder")
@@ -92,7 +93,7 @@ cluster_conf["rings"].each do |ring|
         log "found node matching " + ring['hostname']
         log "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
 
-        execute "adding #{storage_node[:ipaddress]} to #{ring['ring_type']}" do
+        execute "add #{storage_node[:ipaddress]} to #{ring['ring_type']}" do
           cwd '/etc/swift'
           command "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
           
