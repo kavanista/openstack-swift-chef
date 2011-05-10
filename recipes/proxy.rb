@@ -90,16 +90,16 @@ cluster_conf["rings"].each do |ring|
       ## TODO This should check for each ring file vs just account
       search(:node, "hostname:" + ring['hostname'] ) do |storage_node|
         log "found node matching " + ring['hostname']
-        log "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['cluster'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
+        log "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
 
-        execute "make #{storage_node[:ipaddress]}" do
+        execute "adding #{storage_node[:ipaddress]} to #{ring['ring_type']}" do
           cwd '/etc/swift'
-          command "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['cluster'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
+          command "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
           
           notifies :run, "execute[rebalance the #{ring['ring_type']} ring]"
 
           not_if do
-            metaname = "z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['cluster'] + "_" + ring['meta']
+            metaname = "z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta']
             `echo blah > /tmp/blee && cd /etc/swift && swift-ring-builder #{ring['ring_type']}.builder search #{metaname}`
             $? == 256   # Why is this 256?  It's what works, but I don't know why.
           end
