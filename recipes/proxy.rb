@@ -83,7 +83,7 @@ end
 # For each ring, marked online, call ring builder for each node in the bag/ring
 # *NOTE* Only if the ring_type.builder file does not yet exist
 
-cluster_conf["rings"].keys.sort.each do |key|
+cluster_conf["rings"].each do |ring|
   # search for the node with the matching hostname
   if ring['status'] == 'online'
     #unless File.exists?("/etc/swift/#{ring['ring_type']}.builder")
