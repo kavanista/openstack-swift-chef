@@ -140,10 +140,10 @@ storage_nodes = search(:node, "role:swift-storage AND role:environment-#{node[:a
 
 %w{account object container}.each do |ringtype|
   execute "rebalance the #{ringtype} ring" do
-    log "Rebalancing #{ringtype}"
+    #log "Rebalancing #{ringtype}"
     cwd '/etc/swift/'
     command "swift-ring-builder /etc/swift/#{ringtype}.builder rebalance"
-    not_if "test -f /etc/swift/#{ringtype}.builder"
+    #not_if "test -f /etc/swift/#{ringtype}.builder"
     action :nothing
   end
 end
