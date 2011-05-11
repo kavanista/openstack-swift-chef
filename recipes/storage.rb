@@ -110,7 +110,7 @@ end
 
 %w{ swift-object swift-object-replicator swift-object-updater swift-object-auditor swift-container swift-container-replicator swift-container-updater swift-container-auditor swift-account swift-account-replicator swift-account-auditor }.each do |component|
   service component do
-    supports :restart => true, :reload => true
+    supports :restart => true, :reload => true, :start => true, :stop => true, :status => false
     action [ :enable, :start ]
   end
 end
