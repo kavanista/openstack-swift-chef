@@ -58,6 +58,7 @@ template "/etc/swift/proxy-server.conf" do
   mode 0644
   owner "#{node[:openstack_swift][:user]}"
   group "#{node[:openstack_swift][:group]}"
+  notifies :restart, "service[swift-proxy]"
 end
 
 # RING MANAGEMENT
