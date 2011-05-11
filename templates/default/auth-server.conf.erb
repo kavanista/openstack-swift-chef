@@ -1,3 +1,11 @@
 [auth-server]
-default_cluster_url = http://127.0.0.1:8080/v1
-user = <%= node[:cloudfiles][:user] %>
+user = <%= node[:openstack_swift][:user] %>
+
+[pipeline:main]
+pipeline = auth-server
+
+[app:auth-server]
+use = egg:swift#auth
+default_cluster_url = http://<%= node[:ip_address] %>:8080/v1
+
+super_admin_key = <%= @super_admin_key %>
