@@ -15,7 +15,7 @@ directory "/etc/swift" do
   recursive true
   owner node[:openstack_swift][:user]
   group node[:openstack_swift][:group]
-  mode "0644"
+  mode "0755"
 end
 
 cookbook_file "/etc/swift/cert.key" do
