@@ -57,6 +57,13 @@ end
   end
 end
 
+cookbook_file "/home/swift/.ssh/config" do
+  source "ssh_config"
+  owner "swift"
+  group "swift"
+  mode "0600"
+end
+
 %w{swift openssh-server}.each do |pkg_name|
   package pkg_name
 end
