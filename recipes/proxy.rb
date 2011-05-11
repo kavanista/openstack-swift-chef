@@ -42,6 +42,11 @@ execute "fix up memcached.conf to list on proxy network interface" do
   not_if "grep '0.0.0.0' /etc/memcached.conf"
 end
 
+service "swift-proxy" do
+  supports :start => true, :restart => true, :restart => true
+  action [ :enable, :start ]
+end
+
 service "memcached" do
   supports :status => true, :start => true, :stop => true, :restart => true
   action [ :enable, :start ]
