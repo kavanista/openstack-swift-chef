@@ -36,6 +36,7 @@ user "swift" do
   supports :manage_home => true
   action [ :lock, :manage, :modify ]
   home "/home/swift"
+  system true
 end
 
 %w{swift openssh-server}.each do |pkg_name|
