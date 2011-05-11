@@ -136,6 +136,7 @@ end
 # send the rings to all the nodes, if things have changed
 storage_nodes.each_with_index do |storage_node, zone|
   execute "scp rings to #{storage_node[:ipaddress]}" do
+    user "swift"
     cwd '/etc/swift/'
     command "scp /etc/swift/*.builder /etc/swift/*.gz swift@#{storage_node[:ipaddress]}:/etc/swift/"
     action :nothing
