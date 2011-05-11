@@ -18,6 +18,11 @@ template "/etc/swift/auth-server.conf" do
   )
 end
 
+service "swift-auth" do
+  supports :status => true, :start => true, :stop => true, :restart => true
+  action [ :enable, :start]
+end
+
 #execute "add auth user" do
 #	command "swift-auth-add-user -K #{node[:openstack_swift][:super_admin_key]} -a #{node[:openstack_swift][:admin_account]} #{node[:openstack_swift][:admin_username]} #{node[:openstack_swift][:admin_password]} "
 #end
