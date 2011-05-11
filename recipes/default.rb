@@ -23,13 +23,13 @@
 include_recipe 'apt'
 
 package "python-software-properties" do
-	action :install
+  action :install
 end
 
 apt_repository "swift-core-ppa" do
-	uri "http://ppa.launchpad.net/swift-core/ppa/ubuntu"
-	keyserver "keyserver.ubuntu.com"
-	key "3FD32ED0E38B0CFA59495557C842BD46562598B4"
+  uri "http://ppa.launchpad.net/swift-core/ppa/ubuntu"
+  keyserver "keyserver.ubuntu.com"
+  key "3FD32ED0E38B0CFA59495557C842BD46562598B4"
   distribution node[:lsb][:codename]
   components ["main"]
   action :add
@@ -72,10 +72,9 @@ end
 end
 
 directory "/etc/swift" do
-	action :create
+  action :create
 end
 
-# setup the swift configuration files
 cookbook_file "/etc/swift/swift.conf" do
   source "swift.conf"
 end

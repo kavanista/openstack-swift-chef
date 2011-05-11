@@ -20,21 +20,18 @@
 # Recipe:: proxy
 #
 
-
-
-# setup openstack proxy servers
-
-# grab the major config databag
+## grab the major config databag
+## TODO: This should pull the databag name, etc from an attribute defined by a role
 data_bag("testcluster")
-#log ( data_bag_item("testcluster", "conf"))
 cluster_conf = data_bag_item("testcluster", "conf")
-common_conf = cluster_conf["ring_common"]
+common_conf  = cluster_conf["ring_common"]
 
 # install required packages
 %w{swift-proxy memcached}.each do |pkg_name|
   package pkg_name
 end
 
+## TODO This should be moved to only the base (default) recipe used by all node types.
 directory "/etc/swift" do
   recursive true
   owner node[:openstack_swift][:user]
@@ -52,15 +49,14 @@ cookbook_file "/etc/swift/cert.crt" do
   owner "swift"
 end
 
-
-# make ssl certs/keys
+## Right now we're using a static key, that's obviously not acceptable outside of testing, below are some bits we may use in the future
 #execute "make ssl keys" do
 #  command "cd /etc/swift; openssl req -new -x509 -nodes -out cert.crt -keyout cert.key"
 #  not_if "file /etc/swift/cert.crt"
 #  environment( { 'KEY_COUNTRY' => 'US', 'KEY_PROVINCE' => 'NY', 'KEY_CITY' => 'New York', 'KEY_ORG' => 'Voxel dot Net, Inc.', 'KEY_EMAIL' => 'support@voxel.net', 'KEY_CN' => 'swift.voxel.net' } )
 #end
 
-# how do I find the interface I want it to listen on?  Knowing the network, and doing the math.
+## TODO This should only listen on localhost, we need to change the proxy to access it there.
 execute "fix up memcached.conf to list on proxy network interface" do
   command "perl -pi -e 's/^-l 127.0.0.1/-l 0.0.0.0/' /etc/memcached.conf"
   not_if "grep '0.0.0.0' /etc/memcached.conf"
@@ -86,6 +82,9 @@ template "/etc/swift/proxy-server.conf" do
   notifies :restart, "service[swift-proxy]"
 end
 
+## TODO While the below section works for an initial spinup based upon the databag, it does not fully handle modifications to the databag and thus cluster layout over time.
+##      this is something we are currently working on.
+
 # RING MANAGEMENT
 # -create # -add devices # -rebalance # -distribute
 
@@ -98,7 +97,6 @@ end
 
 # create the rings, if there are no rings.
 %w{account object container}.each do |ringtype|
-  #log("swift-ring-builder /etc/swift/#{ringtype}.builder create " + common_conf[#{ringtype}+'_part_power']  )
   execute "make the #{ringtype} ring" do
     command "swift-ring-builder /etc/swift/#{ringtype}.builder create " + 
       common_conf[ ringtype+'_part_power'].to_s + " " +
@@ -108,42 +106,31 @@ end
   end
 end
 
-# Adds Nodes to Rings
-# For each ring, marked online, call ring builder for each node in the bag/ring
-# *NOTE* Only if the ring_type.builder file does not yet exist
-
+## Adds Nodes to Rings
+## For each ring, marked online, call ring builder for each node in the bag/ring
+## *NOTE* Only if the ring_type.builder file does not yet contain this node
+## TODO: This should also locate the nodes by something a bit more specific than hostname
 cluster_conf["rings"].each do |ring|
-  #log "INSPECT: " + ring.inspect
-  # search for the node with the matching hostname
   if ring['status'] == 'online'
-    #unless File.exists?("/etc/swift/#{ring['ring_type']}.builder")
-      ## TODO This should check for each ring file vs just account
-      search(:node, "hostname:" + ring['hostname'] ) do |storage_node|
-        log "found node matching " + ring['hostname']
-        log "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
+    search(:node, "hostname:" + ring['hostname'] ) do |storage_node|
+      log "found node matching " + ring['hostname']
+      log "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
 
-        execute "add #{storage_node[:ipaddress]} to #{ring['ring_type']}" do
-          cwd '/etc/swift'
-          command "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
+      execute "add #{storage_node[:ipaddress]} to #{ring['ring_type']}" do
+        cwd '/etc/swift'
+        command "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
 
-          notifies :run, "execute[rebalance the #{ring['ring_type']} ring]"
+        notifies :run, "execute[rebalance the #{ring['ring_type']} ring]"
 
-          not_if do
-            metaname = "z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta']
-            `echo blah > /tmp/blee && cd /etc/swift && swift-ring-builder #{ring['ring_type']}.builder search #{metaname}`
-            $? == 256   # Why is this 256?  It's what works, but I don't know why.
-          end
+        not_if do
+          metaname = "z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta']
+          `echo blah > /tmp/blee && cd /etc/swift && swift-ring-builder #{ring['ring_type']}.builder search #{metaname}`
+          $? == 256   # Why is this 256?  It's what works, but I don't know why.
         end
-      #end
+      end
     end
   end
 end
-
-#TODO: find approprite exit values for this
-
-# setup the storage nodes and their devices if they differ from the databag
-# RIND_NODE_CONFIG
-# <ring> <zone> <storage node IP address>  <device name> <weight>
 
 storage_nodes = search(:node, "role:swift-storage AND role:environment-#{node[:app_environment]}")
 
