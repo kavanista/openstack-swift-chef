@@ -19,7 +19,7 @@ template "/etc/swift/auth-server.conf" do
 end
 
 service "swift-auth" do
-  supports :status => true, :start => true, :stop => true, :restart => true
+  supports :start => true, :stop => true, :restart => true
   action [ :enable, :start]
 end
 
