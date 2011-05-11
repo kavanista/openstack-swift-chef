@@ -36,7 +36,7 @@ user "swift" do
   supports :manage_home => true
   action [ :lock, :manage, :modify ]
   home "/home/swift"
-  shell "/bin/false"
+  shell "/bin/bash"
   comment "Swift User"
   system true
 end
