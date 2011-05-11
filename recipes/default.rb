@@ -32,6 +32,12 @@ apt_repository "swift-core-ppa" do
   action :add
 end
 
+user "swift" do
+  supports :manage_home => true
+  action [ :lock, :create, :manage ]
+  home "/home/swift"
+end
+
 %w{swift openssh-server}.each do |pkg_name|
   package pkg_name
 end

@@ -149,10 +149,9 @@ storage_nodes = search(:node, "role:swift-storage AND role:environment-#{node[:a
 # rebalance the rings, if things have changed
 %w{account object container}.each do |ringtype|
   execute "rebalance the #{ringtype} ring" do
-    #log "Rebalancing #{ringtype}"
     cwd '/etc/swift/'
     command "swift-ring-builder /etc/swift/#{ringtype}.builder rebalance"
-    #not_if "test -f /etc/swift/#{ringtype}.builder"
+    storage_nodes.map { |sn| notifies :run, "execute[scp rings to #{sn[:ipaddress]}]" }
     action :nothing
   end
 end
@@ -162,10 +161,8 @@ end
 storage_nodes.each_with_index do |storage_node, zone|
   execute "scp rings to #{storage_node[:ipaddress]}" do
     cwd '/etc/swift/'
-    #user "swift"
-    command "scp /etc/swift/*.gz #{storage_node[:ipaddress]}:/etc/swift/"
-    not_if "test -f /etc/swift/account.builder"
+    command "scp /etc/swift/*.builder /etc/swift/*.gz swift@#{storage_node[:ipaddress]}:/etc/swift/"
+    action :nothing
   end
 end
 
-#log("data bagerry " + my_conf[ring_common] )
