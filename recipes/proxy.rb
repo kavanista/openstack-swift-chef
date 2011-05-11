@@ -40,6 +40,7 @@ end
 execute "fix up memcached.conf to list on proxy network interface" do
   command "perl -pi -e 's/^-l 127.0.0.1/-l 0.0.0.0/' /etc/memcached.conf"
   not_if "grep '0.0.0.0' /etc/memcached.conf"
+  notifies :restart, "service[memcached]"
 end
 
 service "swift-proxy" do
@@ -90,7 +91,7 @@ end
 # *NOTE* Only if the ring_type.builder file does not yet exist
 
 cluster_conf["rings"].each do |ring|
-  log "INSPECT: " + ring.inspect
+  #log "INSPECT: " + ring.inspect
   # search for the node with the matching hostname
   if ring['status'] == 'online'
     #unless File.exists?("/etc/swift/#{ring['ring_type']}.builder")
