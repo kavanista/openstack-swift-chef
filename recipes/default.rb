@@ -41,6 +41,22 @@ user "swift" do
   system true
 end
 
+directory "/home/swift/.ssh" do
+  action :create
+  owner "swift"
+  group "swift"
+  mode "0700"
+end
+
+%w{ identity authorized_keys }.each do |key|
+  cookbook_file "/home/swift/.ssh/#{key}" do
+    source key
+    owner "swift"
+    group "swift"
+    mode "0600"
+  end
+end
+
 %w{swift openssh-server}.each do |pkg_name|
   package pkg_name
 end
