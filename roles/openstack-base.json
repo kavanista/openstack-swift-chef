@@ -1,0 +1,42 @@
+{
+    "name": "openstack-base",
+    "default_attributes": {
+      "chef": {
+        "server_url": "http://chefhub.lga6.us.voxel.net:4000",
+        "cache_path": "/var/chef/cache",
+        "backup_path": "/var/chef/backup",
+        "validation_client_name": "chef-validator",
+        "run_path": "/var/chef"
+      }
+    },
+    "json_class": "Chef::Role",
+    "run_list": [
+      "recipe[ubuntu::default]",
+      "recipe[apt::default]",
+      "recipe[build-essential::default]",
+      "recipe[openssl::default]",
+      "recipe[chef-client::default]",
+      "recipe[git::default]",
+      "recipe[munin::client]",
+      "recipe[newgoliath::default]"
+    ],
+    "description": "Basic Server",
+    "chef_type": "role",
+    "override_attributes": {
+    	"authorization": {
+      	"sudo": {
+        	"groups": [
+          	"admin",
+         		"wheel",
+          	"sysadmin"
+        	],
+        	"users": [
+          	"judd",
+          	"jbrinker"
+        	]
+      	}
+    	}
+    }
+}
+
+

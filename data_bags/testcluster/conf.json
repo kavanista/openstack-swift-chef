@@ -1,0 +1,31 @@
+{
+"id": "conf",
+  "ring_common": {
+    "account_part_power": 18,
+    "account_replicas": 3,
+    "account_min_part_hours": 1,
+    "container_part_power": 18,
+    "container_replicas": 3,
+    "container_min_part_hours": 1,
+    "object_part_power": 18,
+    "object_replicas": 3,
+    "object_min_part_hours": 1
+  },
+
+		"rings": [ 
+
+			{ "status": "online", "ring_type": "account", "cluster": "testcluster", "zone": "1", "hostname": "storage1", "port": 6002, "device": "sdb1", "weight": 100, "meta": "install" } ,
+			{ "status": "online", "ring_type": "account", "cluster": "testcluster", "zone": "2", "hostname": "storage2", "port": 6002, "device": "sdb1", "weight": 100, "meta": "install" } ,
+			{ "status": "online", "ring_type": "account", "cluster": "testcluster", "zone": "3", "hostname": "storage3", "port": 6002, "device": "sdb1", "weight": 100, "meta": "install" } ,
+
+			{ "status": "online", "ring_type": "container", "cluster": "testcluster", "zone": "1", "hostname": "storage1", "port": 6001, "device": "sdb1", "weight": 100, "meta": "install" } ,
+			{ "status": "online", "ring_type": "container", "cluster": "testcluster", "zone": "2", "hostname": "storage2", "port": 6001, "device": "sdb1", "weight": 100, "meta": "install" } ,
+			{ "status": "online", "ring_type": "container", "cluster": "testcluster", "zone": "3", "hostname": "storage3", "port": 6001, "device": "sdb1", "weight": 100, "meta": "install" } ,
+
+			{ "status": "online", "ring_type": "object", "cluster": "testcluster", "zone": "1", "hostname": "storage1", "port": 6000, "device": "sdb1", "weight": 100, "meta": "install" } ,
+			{ "status": "online", "ring_type": "object", "cluster": "testcluster", "zone": "2", "hostname": "storage2", "port": 6000, "device": "sdb1", "weight": 100, "meta": "install" } ,
+			{ "status": "online", "ring_type": "object", "cluster": "testcluster", "zone": "3", "hostname": "storage3", "port": 6000, "device": "sdb1", "weight": 100, "meta": "install" } 
+		]
+
+
+}
