@@ -80,8 +80,6 @@ end
       common_conf[ ringtype+'_part_power'].to_s + " " +
       common_conf[ ringtype+'_replicas'].to_s + " " +
       common_conf[ ringtype+'_min_part_hours'].to_s 
-    #command "swift-ring-builder /etc/swift/#{ringtype}.builder create #{common_conf[ #{ringtype}_part_power] } " 
-    
     not_if "test -f /etc/swift/#{ringtype}.builder"
   end
 end
@@ -103,7 +101,7 @@ cluster_conf["rings"].each do |ring|
         execute "add #{storage_node[:ipaddress]} to #{ring['ring_type']}" do
           cwd '/etc/swift'
           command "swift-ring-builder /etc/swift/" + ring['ring_type'] + ".builder add z" + ring['zone'] + '-' + storage_node[:ipaddress] + ":" + ring['port'].to_s + "/" + ring['device'] + "_" + ring['meta'] + " " + ring['weight'].to_s + "; exit 0"
-          
+
           notifies :run, "execute[rebalance the #{ring['ring_type']} ring]"
 
           not_if do
@@ -124,27 +122,6 @@ end
 # <ring> <zone> <storage node IP address>  <device name> <weight>
 
 storage_nodes = search(:node, "role:swift-storage AND role:environment-#{node[:app_environment]}")
-#storage_nodes.each_with_index do |storage_node, zone|
-  #execute "make #{storage_node[:ipaddress]}" do
-    #cwd '/etc/swift/'
-    ##user "swift"
-    #command "swift-ring-builder /etc/swift/account.builder add z#{zone}-#{storage_node[:ipaddress]}:6002/#{node[:openstack_swift][:device_name]} 100; exit 0"
-                #not_if "test -f /etc/swift/account.builder"
-#
-  #end
-  #execute "make #{storage_node[:ipaddress]}" do
-    #cwd '/etc/swift/'
-    ##user "swift"
-    #command "swift-ring-builder /etc/swift/container.builder add z#{zone}-#{storage_node[:ipaddress]}:6001/#{node[:openstack_swift][:device_name]} 100; exit 0"
-                #not_if "test -f /etc/swift/account.builder"
-  #end
-  #execute "make #{storage_node[:ipaddress]}" do
-    #cwd '/etc/swift/'
-    ##user "swift"
-    #command "swift-ring-builder /etc/swift/object.builder add z#{zone}-#{storage_node[:ipaddress]}:6000/#{node[:openstack_swift][:device_name]} 100; exit 0"
-                #not_if "test -f /etc/swift/account.builder"
-  #end
-#end
 
 # rebalance the rings, if things have changed
 %w{account object container}.each do |ringtype|
@@ -155,7 +132,6 @@ storage_nodes = search(:node, "role:swift-storage AND role:environment-#{node[:a
     action :nothing
   end
 end
-
 
 # send the rings to all the nodes, if things have changed
 storage_nodes.each_with_index do |storage_node, zone|

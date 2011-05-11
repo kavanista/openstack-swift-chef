@@ -34,7 +34,7 @@ end
 
 user "swift" do
   supports :manage_home => true
-  action [ :lock, :create, :manage ]
+  action [ :lock, :create, :manage, :modify ]
   home "/home/swift"
 end
 
