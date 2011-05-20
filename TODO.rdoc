@@ -1,0 +1,20 @@
+= TODO:
+
+
+* <b>General Config:</b>
+** Move configs that apply to all types of nodes to recipes/default.rb
+** Setup databage name from an attribute on a role. The role would be applied to the whole cluster
+** Find a recipe to generate proper SSH keys and deply them throughout the cluster
+
+* <b>Proxy Config:</b>
+* Do proper SSL keygen and configuration - allow for self-signed and "real" certs
+* memcache should only listen on localhost - proxy might need to be updated
+
+* <b>Ring Management </b>
+** right now is limited to deploy only.  change ring management to accept ring changes.
+** create the light weight resource to return <ring>.builder configs to test for changes
+** create a scheme to more quickly match data-bag configs to current <ring>.builder status
+
+* <b>Storage Management</b>
+** allow multiple devices on a node to be formatted
+
